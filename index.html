@@ -124,7 +124,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     <div class="ph">
       <div class="dhead-id"><img class="avatar" id="d-photo" alt="" style="display:none"><div><h1 id="d-name">—</h1><div class="role" id="d-role">—</div></div></div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-o" onclick="window.print()">PDF</button>
+        <button class="btn btn-o" id="d-pdf">Download PDF</button>
         <a class="btn" style="background:var(--acc2);color:#0a0a0c" id="d-contact" href="#">CONTACT</a>
       </div>
     </div>
@@ -148,7 +148,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
           </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-o" onclick="window.print()">Download resume</button>
+          <button class="btn btn-o" id="g-pdf">Download resume</button>
           <a class="btn btn-p" id="g-contact" href="#">Get in touch</a>
         </div>
       </div>
@@ -159,6 +159,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -169,6 +170,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   var el = function(id){return document.getElementById(id);};
   var esc = function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
   var kindColor = {IMAGE:"#ffb020",CODE:"#c6f24e",AWARD:"#a8b1c4"};
+  var RESUME = null;
 
   function showError(msg){
     el("loading").style.display="none";
@@ -177,6 +179,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   }
 
   function render(d){
+    RESUME = d;
     document.title = (d.name||"Resume")+" — resume";
     // header
     el("d-name").textContent = d.name||"—";
@@ -246,6 +249,77 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   });
 
   // load
+  /* ---------- PDF export (jsPDF — real text, A4, ATS-readable) ---------- */
+  function makePDF(){
+    if(!RESUME || !window.jspdf){ return; }
+    var d = RESUME;
+    var doc = new window.jspdf.jsPDF({unit:"mm", format:"a4"});
+    var M=18, X=M, RIGHT=210-M, W=210-M*2, PH=297, y=22;
+    var C_DARK=[17,17,20], C_BODY=[55,65,81], C_GRAY=[107,114,128];
+
+    function ensure(h){ if(y+h > PH-M){ doc.addPage(); y=22; } }
+    function set(size,style,col){ doc.setFontSize(size); doc.setFont("helvetica",style||"normal"); doc.setTextColor(col[0],col[1],col[2]); }
+    function label(t){ ensure(10); y+=3; set(9,"bold",C_DARK); doc.text(String(t).toUpperCase(), X, y); y+=5.5; }
+    function wrap(t,size,col,indent,lh){
+      indent=indent||0; lh=lh||4.6; set(size,"normal",col);
+      var lines=doc.splitTextToSize(String(t), W-indent);
+      for(var i=0;i<lines.length;i++){ ensure(lh); doc.text(lines[i], X+indent, y); y+=lh; }
+    }
+
+    // header
+    set(22,"bold",C_DARK); doc.text((d.name||"").toUpperCase(), X, y); y+=8;
+    var sub=[d.role, d.location].filter(Boolean).join("  ·  ");
+    if(sub){ set(10,"normal",C_GRAY); doc.text(sub, X, y); y+=5; }
+    if(d.email){ set(9,"normal",C_GRAY); doc.text(d.email, X, y); y+=4; }
+    y+=2; doc.setDrawColor(17,17,20); doc.setLineWidth(0.5); doc.line(X, y, RIGHT, y); y+=6;
+
+    // experience
+    if(d.experience && d.experience.length){
+      label("Experience");
+      d.experience.forEach(function(x){
+        var title=[x.role, x.company].filter(Boolean).join(", ");
+        var from=(x.from||"").replace(/\s*\/\s*\d+$/,"").trim();
+        var date=from + (x.to? " — "+x.to : "");
+        ensure(6);
+        set(11,"bold",C_DARK); doc.text(title, X, y);
+        set(9,"normal",C_GRAY); doc.text(date, RIGHT, y, {align:"right"});
+        y+=5;
+        (x.highlights||[]).filter(Boolean).forEach(function(h){
+          set(9.5,"normal",C_BODY);
+          var lines=doc.splitTextToSize(h, W-4);
+          ensure(4.6); doc.text("•", X, y);
+          for(var i=0;i<lines.length;i++){ ensure(4.6); doc.text(lines[i], X+4, y); y+=4.6; }
+        });
+        y+=2.5;
+      });
+    }
+    // education + awards
+    [["Education",d.education],["Awards",d.awards]].forEach(function(pair){
+      var rows=pair[1]; if(!rows || !rows.length) return;
+      label(pair[0]);
+      rows.forEach(function(r){
+        ensure(6);
+        set(11,"bold",C_DARK); doc.text(r.title||"", X, y);
+        if(r.meta){ set(9,"normal",C_GRAY); doc.text(r.meta, RIGHT, y, {align:"right"}); }
+        y+=5;
+        if(r.body){ wrap(r.body, 9.5, C_BODY, 0, 4.6); }
+        y+=2.5;
+      });
+    });
+    // skills
+    if(d.skills && d.skills.length){ label("Skills"); wrap(d.skills.join("   ·   "), 9.5, C_BODY, 0, 4.8); }
+
+    // footer page numbers
+    var pages=doc.getNumberOfPages();
+    for(var p=1;p<=pages;p++){ doc.setPage(p); set(8,"normal",C_GRAY); doc.text("Generated with kompile  ·  page "+p+" / "+pages, X, PH-10); }
+
+    var fn=(d.name||"resume").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"")||"resume";
+    doc.save(fn+"_resume.pdf");
+  }
+  var pdfBtnD=el("d-pdf"), pdfBtnG=el("g-pdf");
+  if(pdfBtnD) pdfBtnD.addEventListener("click",makePDF);
+  if(pdfBtnG) pdfBtnG.addEventListener("click",makePDF);
+
   sb.from("resume").select("data,updated_at").eq("slug","main").single().then(function(res){
     if(res.error){ showError(res.error.message); return; }
     if(!res.data || !res.data.data){ showError("This profile has no data yet."); return; }
