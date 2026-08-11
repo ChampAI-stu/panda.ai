@@ -65,6 +65,9 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .dwork .t{font-weight:600;font-size:13.5px;color:#e8ecf5}
 .dwork .m{font-family:"JetBrains Mono",monospace;font-size:10px;color:#5c6785;margin-top:5px}
 .pfoot{margin-top:30px;display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:11px;color:#4a5470;flex-wrap:wrap;gap:8px}
+.avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none;border:1px solid rgba(255,255,255,.15)}
+.dhead-id{display:flex;gap:16px;align-items:center}
+.dwork .cell .cellimg{width:calc(100% + 28px);margin:-14px -14px 12px;height:96px;object-fit:cover;display:block;border-bottom:1px solid rgba(255,255,255,.1)}
 
 /* gallery view */
 .gal{border:1px solid rgba(255,255,255,.1);background:var(--card);margin-bottom:40px}
@@ -76,7 +79,10 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,.1)}
 .gtile{background:var(--card);padding:22px 20px 24px;min-height:170px;display:flex;flex-direction:column}
 .gtile .k{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:9px;letter-spacing:.12em;margin-bottom:12px}
-.gtile .box{flex:1;border:1px dashed rgba(255,255,255,.13);margin-bottom:14px;min-height:52px}
+.gtile .box{flex:1;border:1px dashed rgba(255,255,255,.13);margin-bottom:14px;min-height:52px;overflow:hidden;display:flex}
+.gtile .box img{width:100%;height:100%;object-fit:cover}
+.gal-photo{width:100px;height:100px;border-radius:50%;object-fit:cover;flex:none;border:1px solid rgba(255,255,255,.18)}
+.pgal-head .id{display:flex;gap:24px;align-items:center}
 .gtile .t{font-weight:600;font-size:14px;color:#e8ecf5}
 .gtile .d{font-size:11.5px;color:#7d879e;margin-top:5px}
 .gtile .m{font-family:"JetBrains Mono",monospace;font-size:10px;color:#5c6785;margin-top:8px}
@@ -116,7 +122,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   <!-- DOCUMENT -->
   <div class="pdoc" id="v-doc">
     <div class="ph">
-      <div><h1 id="d-name">—</h1><div class="role" id="d-role">—</div></div>
+      <div class="dhead-id"><img class="avatar" id="d-photo" alt="" style="display:none"><div><h1 id="d-name">—</h1><div class="role" id="d-role">—</div></div></div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-o" onclick="window.print()">PDF</button>
         <a class="btn" style="background:var(--acc2);color:#0a0a0c" id="d-contact" href="#">CONTACT</a>
@@ -133,10 +139,13 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   <div class="gal" id="v-gallery" style="display:none">
     <div class="grid-bg pgal-head">
       <div class="top">
-        <div>
-          <div class="otw" id="g-otw">OPEN TO WORK</div>
-          <h1 id="g-name">—</h1>
-          <div class="role" id="g-role">—</div>
+        <div class="id">
+          <img class="gal-photo" id="g-photo" alt="" style="display:none">
+          <div>
+            <div class="otw" id="g-otw">OPEN TO WORK</div>
+            <h1 id="g-name">—</h1>
+            <div class="role" id="g-role">—</div>
+          </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-o" onclick="window.print()">Download resume</button>
@@ -176,6 +185,10 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     el("g-role").textContent = d.role||"";
     el("d-bio").textContent = d.bio||"";
     el("g-otw").style.display = d.openToWork===false ? "none" : "block";
+    if(d.photo){
+      el("d-photo").src=d.photo; el("d-photo").style.display="block";
+      el("g-photo").src=d.photo; el("g-photo").style.display="block";
+    }
     var mail = d.email ? "mailto:"+d.email : "#";
     el("d-contact").href = mail; el("g-contact").href = mail;
     el("d-updated").textContent = "Updated "+ (d._updated || new Date().toISOString().slice(0,10).replace(/-/g," / "));
@@ -206,14 +219,14 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     var pub = (d.works||[]).filter(function(w){return w.pub;});
     el("d-workrow").style.display = pub.length ? "grid" : "none";
     el("d-works").innerHTML = pub.slice(0,6).map(function(w){
-      return '<div class="cell"><div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="t">'+esc(w.title)+'</div><div class="m">'+esc(w.date)+'</div></div>';
+      return '<div class="cell">'+(w.image?'<img class="cellimg" src="'+esc(w.image)+'" alt="">':'')+'<div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="t">'+esc(w.title)+'</div><div class="m">'+esc(w.date)+'</div></div>';
     }).join("");
 
     el("d-skills").innerHTML = (d.skills||[]).map(function(k){return "<span>"+esc(k)+"</span>";}).join("");
 
     // gallery tiles
     el("g-tiles").innerHTML = pub.map(function(w){
-      return '<div class="gtile"><div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="box"></div><div class="t">'+esc(w.title)+'</div><div class="d">'+esc(w.desc)+'</div><div class="m">'+esc(w.date)+'</div></div>';
+      return '<div class="gtile"><div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="box">'+(w.image?'<img src="'+esc(w.image)+'" alt="">':'')+'</div><div class="t">'+esc(w.title)+'</div><div class="d">'+esc(w.desc)+'</div><div class="m">'+esc(w.date)+'</div></div>';
     }).join("");
     if(!pub.length) el("g-tiles").innerHTML = '<div class="gtile" style="grid-column:1/-1;align-items:center;justify-content:center;color:#5c6785">No published work yet.</div>';
 
