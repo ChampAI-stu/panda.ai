@@ -74,6 +74,18 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .work .row3{grid-template-columns:120px 1fr 1fr}
 .kindsel{padding:10px 12px;background:var(--input);border:1px solid rgba(255,255,255,.14);color:#e8ecf5;font:400 13px "JetBrains Mono",monospace}
 
+/* image upload */
+.imgrow{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+.thumb{width:88px;height:88px;flex:none;border:1px dashed rgba(255,255,255,.2);background:var(--input);display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:8px;color:#4a5470;overflow:hidden;position:relative}
+.thumb.round{border-radius:50%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.imgbtns{display:flex;flex-direction:column;gap:8px}
+.imgbtns .rm{font-family:"JetBrains Mono",monospace;font-size:11px;color:#5c6785;text-align:left}
+.imgbtns .rm:hover{color:#ff5d5d}
+.uploading{position:absolute;inset:0;background:rgba(7,10,18,.8);display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--acc2)}
+.work .imgrow{margin-top:6px}
+.work .thumb{width:72px;height:72px}
+
 @media(max-width:560px){.row2,.row3,.work .row3{grid-template-columns:1fr}}
 </style>
 </head>
@@ -122,6 +134,15 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
         <div class="field"><label>LOCATION</label><input data-path="location"></div>
         <div class="field"><label>CONTACT EMAIL</label><input data-path="email"></div>
       </div>
+      <div class="field"><label>PHOTO</label>
+        <div class="imgrow">
+          <div class="thumb round" id="photothumb">PHOTO</div>
+          <div class="imgbtns">
+            <button class="add" style="margin:0" data-upload="photo">Upload photo</button>
+            <button class="rm" data-rmimg="photo">Remove</button>
+          </div>
+        </div>
+      </div>
       <div class="field"><label>SUMMARY</label><textarea data-path="bio"></textarea></div>
       <label class="tog" id="otwtog"><span class="sw"><span class="knob"></span></span> Show “OPEN TO WORK” badge</label>
     </div>
@@ -165,6 +186,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 
     <div style="height:60px"></div>
   </div>
+  <input type="file" id="fileinput" accept="image/*" style="display:none">
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -236,6 +258,8 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     });
     el("skills").value=(model.skills||[]).join(", ");
     el("otwtog").classList.toggle("on", model.openToWork!==false);
+    var pt=el("photothumb");
+    pt.innerHTML = model.photo ? '<img src="'+esc(model.photo)+'">' : "PHOTO";
   }
   function renderExp(){
     el("exp").innerHTML = model.experience.map(function(x,i){
@@ -269,7 +293,11 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
         '<div class="field"><label>DATE</label><input data-path="works.'+i+'.date" value="'+esc(w.date)+'"></div></div>'+
         '<div class="row2"><div class="field"><label>DESCRIPTION</label><input data-path="works.'+i+'.desc" value="'+esc(w.desc)+'"></div>'+
         '<div class="field"><label>TAG</label><input data-path="works.'+i+'.tag" value="'+esc(w.tag)+'"></div></div>'+
-        '<label class="tog'+(w.pub?' on':'')+'" data-pub="'+i+'"><span class="sw"><span class="knob"></span></span> On profile</label></div>';
+        '<label style="font-family:JetBrains Mono,monospace;font-size:10px;color:#5c6785;letter-spacing:.1em;display:block;margin-bottom:6px">IMAGE</label>'+
+        '<div class="imgrow"><div class="thumb" data-workthumb="'+i+'">'+(w.image?'<img src="'+esc(w.image)+'">':'IMAGE')+'</div>'+
+        '<div class="imgbtns"><button class="add" style="margin:0" data-upload="works.'+i+'">Upload image</button>'+
+        '<button class="rm" data-rmimg="works.'+i+'">Remove</button></div></div>'+
+        '<label class="tog'+(w.pub?' on':'')+'" data-pub="'+i+'" style="margin-top:12px"><span class="sw"><span class="knob"></span></span> On profile</label></div>';
     }).join("");
   }
   function renderAll(){ bindTop(); renderExp(); renderRows("education","edu"); renderRows("awards","awd"); renderWorks(); }
@@ -296,6 +324,37 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     if(add){ addEntry(add.getAttribute("data-add")); markDirty(); return; }
     var ah=e.target.closest("[data-addhl]");
     if(ah){ var idx=+ah.getAttribute("data-addhl"); (model.experience[idx].highlights=model.experience[idx].highlights||[]).push(""); renderExp(); markDirty(); return; }
+    var up=e.target.closest("[data-upload]");
+    if(up){ startUpload(up.getAttribute("data-upload")); return; }
+    var rm=e.target.closest("[data-rmimg]");
+    if(rm){ setImage(rm.getAttribute("data-rmimg"), ""); markDirty(); return; }
+  });
+
+  /* ---------- image upload (Supabase Storage) ---------- */
+  var uploadTarget=null;
+  function setImage(target, url){
+    if(target==="photo"){ model.photo=url||undefined; var pt=el("photothumb"); pt.innerHTML = url ? '<img src="'+esc(url)+'">' : "PHOTO"; }
+    else { var i=+target.split(".")[1]; if(model.works[i]){ model.works[i].image=url||undefined; var th=document.querySelector('[data-workthumb="'+i+'"]'); if(th) th.innerHTML = url ? '<img src="'+esc(url)+'">' : "IMAGE"; } }
+  }
+  function thumbEl(target){
+    return target==="photo" ? el("photothumb") : document.querySelector('[data-workthumb="'+target.split(".")[1]+'"]');
+  }
+  function startUpload(target){ uploadTarget=target; el("fileinput").value=""; el("fileinput").click(); }
+  el("fileinput").addEventListener("change",function(){
+    var file=this.files && this.files[0]; if(!file || !uploadTarget) return;
+    if(file.size > 5*1024*1024){ stat("image too large (max 5 MB)","err"); return; }
+    var th=thumbEl(uploadTarget), overlay=null;
+    if(th){ overlay=document.createElement("div"); overlay.className="uploading"; overlay.textContent="…"; th.appendChild(overlay); }
+    var ext=(file.name.split(".").pop()||"png").toLowerCase().replace(/[^a-z0-9]/g,"");
+    var path=user.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;
+    stat("uploading image…");
+    sb.storage.from("resume-media").upload(path, file, {contentType:file.type, upsert:false}).then(function(r){
+      if(r.error){ if(overlay)overlay.remove(); stat("upload failed: "+r.error.message,"err"); return; }
+      var pub=sb.storage.from("resume-media").getPublicUrl(path);
+      setImage(uploadTarget, pub.data.publicUrl);
+      markDirty(); stat("image added — remember to Save","ok");
+      uploadTarget=null;
+    });
   });
 
   function removePath(p){
