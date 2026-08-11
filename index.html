@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--acc:#ffb020;--acc2:#c6f24e;--bg:#0a0a0c;--card:#070a12;--dark:#05070d;--input:#0d1220}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:#e8ecf5;font-family:"Space Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",monospace}
+a{color:var(--acc);text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+.grid-bg{background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:40px 40px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-weight:600;font-size:12.5px}
+.btn-p{background:var(--acc);color:#0a0a0c}
+.btn-o{border:1px solid rgba(255,255,255,.18);color:#e8ecf5}
+
+/* top */
+.bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;max-width:1040px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:18px;height:18px;background:var(--acc);clip-path:polygon(0 0,100% 0,100% 70%,70% 100%,0 100%)}
+.brand span{font-weight:700;font-size:13px;color:#e8ecf5}
+.switch{display:flex;gap:8px}
+.switch button{padding:7px 15px;font-family:"JetBrains Mono",monospace;font-weight:500;font-size:11px;border:1px solid rgba(255,255,255,.14);color:#8d97ad;letter-spacing:.06em}
+.switch button.on{background:var(--acc);color:#0a0a0c;border-color:var(--acc)}
+
+/* states */
+.state{max-width:520px;margin:16vh auto;text-align:center;padding:0 24px}
+.state .k{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--acc2);margin-bottom:14px}
+.state h2{font-weight:700;font-size:26px;color:#f2f5fa;margin:0 0 10px;letter-spacing:-.02em}
+.state p{color:#8d97ad;font-size:14px;line-height:1.6;margin:0}
+.spin{width:26px;height:26px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--acc);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 18px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+#app{display:none}
+
+/* document view */
+.pdoc{padding:44px 56px 52px;background:var(--card);border:1px solid rgba(255,255,255,.1);margin-bottom:40px}
+.pdoc .ph{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:30px;flex-wrap:wrap;gap:16px}
+.pdoc h1{margin:0 0 10px;font-weight:700;font-size:42px;color:#f2f5fa;letter-spacing:-.035em}
+.pdoc .role{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--acc)}
+.pdoc .bio{margin:0 0 40px;max-width:620px;font-size:15.5px;line-height:1.7;color:#a8b1c4}
+.drow{display:grid;grid-template-columns:150px 1fr;gap:36px;padding:24px 0;border-top:1px solid rgba(255,255,255,.08)}
+.dlabel{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:10px;color:#5c6785;letter-spacing:.16em;padding-top:3px}
+.dentry{margin-bottom:20px}
+.dentry:last-child{margin-bottom:0}
+.dentry .eh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:12px;flex-wrap:wrap}
+.dentry .et{font-weight:600;font-size:16px;color:#e8ecf5}
+.dentry .em{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:#5c6785}
+.dentry ul{margin:6px 0 0;padding-left:17px;font-size:13.5px;line-height:1.6;color:#8d97ad}
+.dentry ul li{margin-bottom:3px}
+.dentry .eb{font-size:13.5px;line-height:1.6;color:#8d97ad}
+.dskills{display:flex;flex-wrap:wrap;gap:7px}
+.dskills span{padding:6px 11px;border:1px solid rgba(255,255,255,.14);font-family:"JetBrains Mono",monospace;font-size:12px;color:#a8b1c4}
+.dwork{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dwork .cell{border:1px solid rgba(255,255,255,.12);background:var(--input);padding:14px}
+.dwork .k{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:8.5px;letter-spacing:.1em;margin-bottom:10px}
+.dwork .t{font-weight:600;font-size:13.5px;color:#e8ecf5}
+.dwork .m{font-family:"JetBrains Mono",monospace;font-size:10px;color:#5c6785;margin-top:5px}
+.pfoot{margin-top:30px;display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:11px;color:#4a5470;flex-wrap:wrap;gap:8px}
+
+/* gallery view */
+.gal{border:1px solid rgba(255,255,255,.1);background:var(--card);margin-bottom:40px}
+.pgal-head{position:relative;padding:48px 44px 38px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pgal-head .top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px}
+.otw{font-family:"JetBrains Mono",monospace;font-weight:500;font-size:10px;color:var(--acc2);letter-spacing:.16em;margin-bottom:12px}
+.pgal-head h1{margin:0 0 12px;font-weight:700;font-size:56px;line-height:.95;color:#f2f5fa;letter-spacing:-.04em}
+.pgal-head .role{font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--acc)}
+.gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,.1)}
+.gtile{background:var(--card);padding:22px 20px 24px;min-height:170px;display:flex;flex-direction:column}
+.gtile .k{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:9px;letter-spacing:.12em;margin-bottom:12px}
+.gtile .box{flex:1;border:1px dashed rgba(255,255,255,.13);margin-bottom:14px;min-height:52px}
+.gtile .t{font-weight:600;font-size:14px;color:#e8ecf5}
+.gtile .d{font-size:11.5px;color:#7d879e;margin-top:5px}
+.gtile .m{font-family:"JetBrains Mono",monospace;font-size:10px;color:#5c6785;margin-top:8px}
+
+@media print{.bar,.switch{display:none}.pdoc,.gal{border:0;margin:0}}
+@media(max-width:620px){
+  .drow{grid-template-columns:1fr;gap:12px}
+  .pdoc,.pgal-head{padding-left:22px;padding-right:22px}
+  .pgal-head h1{font-size:40px}.pdoc h1{font-size:34px}
+  .dwork,.gtiles{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="brand"><div class="logo"></div><span>kompile</span></div>
+  <div class="switch" id="switch" style="display:none">
+    <button data-view="doc" class="on">DOCUMENT</button>
+    <button data-view="gallery">GALLERY</button>
+  </div>
+</div>
+
+<!-- loading -->
+<div class="state" id="loading"><div class="spin"></div><div class="k">LOADING</div><p>Fetching the latest version of this profile.</p></div>
+
+<!-- error -->
+<div class="state" id="error" style="display:none">
+  <div class="k" style="color:#ff5d5d">CANNOT LOAD</div>
+  <h2>This profile is not available</h2>
+  <p id="errmsg">The page could not reach the resume data. Try refreshing in a moment.</p>
+</div>
+
+<!-- content -->
+<div id="app"><div class="wrap">
+
+  <!-- DOCUMENT -->
+  <div class="pdoc" id="v-doc">
+    <div class="ph">
+      <div><h1 id="d-name">—</h1><div class="role" id="d-role">—</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-o" onclick="window.print()">PDF</button>
+        <a class="btn" style="background:var(--acc2);color:#0a0a0c" id="d-contact" href="#">CONTACT</a>
+      </div>
+    </div>
+    <p class="bio" id="d-bio">—</p>
+    <div id="d-sections"></div>
+    <div class="drow" id="d-workrow"><div class="dlabel">WORK</div><div class="dwork" id="d-works"></div></div>
+    <div class="drow" style="border-bottom:1px solid rgba(255,255,255,.08)"><div class="dlabel">SKILLS</div><div class="dskills" id="d-skills"></div></div>
+    <div class="pfoot"><span id="d-updated">—</span><span>Built with kompile</span></div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="gal" id="v-gallery" style="display:none">
+    <div class="grid-bg pgal-head">
+      <div class="top">
+        <div>
+          <div class="otw" id="g-otw">OPEN TO WORK</div>
+          <h1 id="g-name">—</h1>
+          <div class="role" id="g-role">—</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-o" onclick="window.print()">Download resume</button>
+          <a class="btn btn-p" id="g-contact" href="#">Get in touch</a>
+        </div>
+      </div>
+    </div>
+    <div class="gtiles" id="g-tiles"></div>
+  </div>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var SUPABASE_URL  = "https://ynnfniwbpfmsacigiehk.supabase.co";
+  var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlubmZuaXdicGZtc2FjaWdpZWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzMwNjcsImV4cCI6MjEwMjAwOTA2N30.nEz1tn1ouOW2_ps8e-0IezXtGXhJCDtfxKpUHJJWQ7o";
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  var el = function(id){return document.getElementById(id);};
+  var esc = function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+  var kindColor = {IMAGE:"#ffb020",CODE:"#c6f24e",AWARD:"#a8b1c4"};
+
+  function showError(msg){
+    el("loading").style.display="none";
+    el("error").style.display="block";
+    if(msg) el("errmsg").textContent = msg;
+  }
+
+  function render(d){
+    document.title = (d.name||"Resume")+" — resume";
+    // header
+    el("d-name").textContent = d.name||"—";
+    el("g-name").textContent = d.name||"—";
+    el("d-role").textContent = d.role ? (d.role + (d.location? " · "+d.location : "")) : (d.location||"");
+    el("g-role").textContent = d.role||"";
+    el("d-bio").textContent = d.bio||"";
+    el("g-otw").style.display = d.openToWork===false ? "none" : "block";
+    var mail = d.email ? "mailto:"+d.email : "#";
+    el("d-contact").href = mail; el("g-contact").href = mail;
+    el("d-updated").textContent = "Updated "+ (d._updated || new Date().toISOString().slice(0,10).replace(/-/g," / "));
+
+    // document sections: experience / education / awards
+    var sec = "";
+    if(d.experience && d.experience.length){
+      sec += '<div class="drow"><div class="dlabel">EXPERIENCE</div><div>'+
+        d.experience.map(function(x){
+          var from=(x.from||"").replace(/\s*\/\s*\d+$/,"").trim();
+          var date = from + (x.to? " — "+x.to : "");
+          var hls = (x.highlights||[]).filter(Boolean);
+          return '<div class="dentry"><div class="eh"><span class="et">'+esc(x.role)+(x.company?", "+esc(x.company):"")+'</span><span class="em">'+esc(date)+'</span></div>'+
+            (hls.length? '<ul>'+hls.map(function(h){return "<li>"+esc(h)+"</li>";}).join("")+'</ul>' : '')+'</div>';
+        }).join("")+'</div></div>';
+    }
+    if(d.education && d.education.length){
+      sec += '<div class="drow"><div class="dlabel">EDUCATION</div><div>'+
+        d.education.map(function(r){return '<div class="dentry"><div class="eh"><span class="et">'+esc(r.title)+'</span><span class="em">'+esc(r.meta)+'</span></div><div class="eb">'+esc(r.body)+'</div></div>';}).join("")+'</div></div>';
+    }
+    if(d.awards && d.awards.length){
+      sec += '<div class="drow"><div class="dlabel">AWARDS</div><div>'+
+        d.awards.map(function(r){return '<div class="dentry"><div class="eh"><span class="et">'+esc(r.title)+'</span><span class="em">'+esc(r.meta)+'</span></div><div class="eb">'+esc(r.body)+'</div></div>';}).join("")+'</div></div>';
+    }
+    el("d-sections").innerHTML = sec;
+
+    // published works only
+    var pub = (d.works||[]).filter(function(w){return w.pub;});
+    el("d-workrow").style.display = pub.length ? "grid" : "none";
+    el("d-works").innerHTML = pub.slice(0,6).map(function(w){
+      return '<div class="cell"><div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="t">'+esc(w.title)+'</div><div class="m">'+esc(w.date)+'</div></div>';
+    }).join("");
+
+    el("d-skills").innerHTML = (d.skills||[]).map(function(k){return "<span>"+esc(k)+"</span>";}).join("");
+
+    // gallery tiles
+    el("g-tiles").innerHTML = pub.map(function(w){
+      return '<div class="gtile"><div class="k" style="color:'+(kindColor[w.kind]||"#8d97ad")+'">'+esc(w.kind)+'</div><div class="box"></div><div class="t">'+esc(w.title)+'</div><div class="d">'+esc(w.desc)+'</div><div class="m">'+esc(w.date)+'</div></div>';
+    }).join("");
+    if(!pub.length) el("g-tiles").innerHTML = '<div class="gtile" style="grid-column:1/-1;align-items:center;justify-content:center;color:#5c6785">No published work yet.</div>';
+
+    el("loading").style.display="none";
+    el("app").style.display="block";
+    el("switch").style.display="flex";
+  }
+
+  // view toggle
+  document.querySelectorAll("#switch button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var v=this.getAttribute("data-view");
+      document.querySelectorAll("#switch button").forEach(function(x){x.classList.toggle("on",x===b);});
+      el("v-doc").style.display = v==="doc"?"block":"none";
+      el("v-gallery").style.display = v==="gallery"?"block":"none";
+    });
+  });
+
+  // load
+  sb.from("resume").select("data,updated_at").eq("slug","main").single().then(function(res){
+    if(res.error){ showError(res.error.message); return; }
+    if(!res.data || !res.data.data){ showError("This profile has no data yet."); return; }
+    var d = res.data.data;
+    if(res.data.updated_at) d._updated = res.data.updated_at.slice(0,10).replace(/-/g," / ");
+    try{ render(d); }catch(e){ showError("Could not render this profile."); }
+  }).catch(function(e){ showError(e && e.message ? e.message : "Network error."); });
+})();
+</script>
+</body>
+</html>
